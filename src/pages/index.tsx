@@ -22,6 +22,9 @@ const PARTICLE_PROJECT_ID = process.env
   .NEXT_PUBLIC_PARTICLE_PROJECT_ID as string;
 const PARTICLE_CLIENT_KEY = process.env
   .NEXT_PUBLIC_PARTICLE_CLIENT_KEY as string;
+const PARTICLE_APP_ID = process.env.NEXT_PUBLIC_PARTICLE_APP_ID as string;
+
+console.log("PAYMASTER_URL", PAYMASTER_URL, BUNDLER_URL);
 
 export default function Home() {
   const [address, setAddress] = useState<string>("");
@@ -36,7 +39,7 @@ export default function Home() {
   const particle = new ParticleAuthModule.ParticleNetwork({
     projectId: PARTICLE_PROJECT_ID,
     clientKey: PARTICLE_CLIENT_KEY,
-    appId: "",
+    appId: PARTICLE_APP_ID,
     wallet: {
       displayWalletEntry: true,
       defaultWalletEntryPosition: ParticleAuthModule.WalletEntryPosition.BR,
