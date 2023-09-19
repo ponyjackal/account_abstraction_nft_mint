@@ -24,6 +24,15 @@ const PARTICLE_CLIENT_KEY = process.env
   .NEXT_PUBLIC_PARTICLE_CLIENT_KEY as string;
 
 export default function Home() {
+  const [address, setAddress] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [smartAccount, setSmartAccount] = useState<BiconomySmartAccount | null>(
+    null
+  );
+  const [provider, setProvider] = useState<ethers.providers.Provider | null>(
+    null
+  );
+
   const particle = new ParticleAuthModule.ParticleNetwork({
     projectId: PARTICLE_PROJECT_ID,
     clientKey: PARTICLE_CLIENT_KEY,
@@ -45,14 +54,28 @@ export default function Home() {
 
   const connect = async () => {
     try {
+      setLoading(true);
       const userInfo = await particle.auth.login();
       console.log("Logged in user:", userInfo);
       const particleProvider = new ParticleProvider(particle.auth);
-      console.log({ particleProvider });
       const web3Provider = new ethers.providers.Web3Provider(
         particleProvider,
         "any"
       );
+      setProvider(web3Provider);
+      const biconomySmartAccountConfig: BiconomySmartAccountConfig = {
+        signer: web3Provider.getSigner(),
+        chainId: ChainId.BASE_GOERLI_TESTNET,
+        bundler: bundler,
+        paymaster: paymaster,
+      };
+      let biconomySmartAccount = new BiconomySmartAccount(
+        biconomySmartAccountConfig
+      );
+      biconomySmartAccount = await biconomySmartAccount.init();
+      setAddress(await biconomySmartAccount.getSmartAccountAddress());
+      setSmartAccount(biconomySmartAccount);
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -65,9 +88,15 @@ export default function Home() {
         <meta name="description" content="Based Account Abstraction" />
       </Head>
       <main className={styles.main}>
-        <button className={styles.connect} onClick={connect}>
-          Connect
-        </button>
+        <h1>Based Account Abstraction</h1>
+        <h2>Connect and Mint your AA powered NFT now</h2>
+        {!loading && !address && (
+          <button onClick={connect} className={styles.connect}>
+            Connect to Based Web3
+          </button>
+        )}
+        {loading && <p>Loading Smart Account...</p>}
+        {address && <h2>Smart Account: {address}</h2>}
       </main>
     </>
   );
