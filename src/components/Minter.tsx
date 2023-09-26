@@ -44,19 +44,21 @@ const Minter: React.FC<Props> = ({ smartAccount, address, provider }) => {
       console.log("here before userop");
       let userOp = await smartAccount.buildUserOp([tx1]);
       console.log({ userOp });
-      const biconomyPaymaster =
-        smartAccount.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
-      let paymasterServiceData: SponsorUserOperationDto = {
-        mode: PaymasterMode.SPONSORED,
-      };
-      const paymasterAndDataResponse =
-        await biconomyPaymaster.getPaymasterAndData(
-          userOp,
-          paymasterServiceData
-        );
+      // const biconomyPaymaster =
+      //   smartAccount.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
+      // let paymasterServiceData: SponsorUserOperationDto = {
+      //   mode: PaymasterMode.SPONSORED,
+      // };
+      // const paymasterAndDataResponse =
+      //   await biconomyPaymaster.getPaymasterAndData(
+      //     userOp,
+      //     paymasterServiceData
+      //   );
 
-      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
-      const userOpResponse = await smartAccount.sendUserOp(userOp);
+      // userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      const signedUserOp = await smartAccount.signUserOp(userOp);
+      console.log("signedUserOp", signedUserOp);
+      const userOpResponse = await smartAccount.sendSignedUserOp(signedUserOp);
       console.log("userOpHash", userOpResponse);
       const { receipt } = await userOpResponse.wait(1);
       console.log("txHash", receipt.transactionHash);
